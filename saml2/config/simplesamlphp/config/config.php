@@ -21,7 +21,7 @@ $config = array(
      * external url, no matter where you come from (direct access or via the
      * reverse proxy).
      */
-    'baseurlpath' => getenv('SIMPLESAMLPHP_BASEURLPATH'),
+    'baseurlpath' => 'simplesaml/',
     'certdir' => 'cert/',
     'loggingdir' => 'log/',
     'datadir' => 'data/',
@@ -260,7 +260,7 @@ $config = array(
      * In example when you are setting up a federation bridge.
      */
     'enable.saml20-idp' => true,
-    'enable.shib13-idp' => true,
+    'enable.shib13-idp' => false,
     'enable.adfs-idp' => false,
     'enable.wsfed-sp' => false,
     'enable.authmemcookie' => false,
