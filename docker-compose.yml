@@ -39,14 +39,21 @@ services:
       MYSQL_DATABASE: ${DB_DATABASE}
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
   keycloak-lb:
-    image: traefik:v2.1
+    image: keycloak-lb
+    build: keycloak-lb
     ports:
       - 80:80
     depends_on:
       - keycloak
+    environment:
+      WAIT_FOR_KEYCLOAK: curl -f -s -o /dev/null http://keycloak:8080/auth/admin
+      RETRIES_COUNT: 20
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - ./keycloak-config/scripts/wait-for.sh:/opt/wait-for.sh
+    entrypoint: /opt/wait-for.sh
     command:
+      - "/entrypoint.sh"
       - "traefik"
       - "--providers.docker"
       - "--accesslog=true"
@@ -62,4 +69,5 @@ services:
       KEYCLOAK_PASSWORD: ${KEYCLOAK_PASSWORD}
       KEYCLOAK_CLIENT_ID: admin-cli
       KEYCLOAK_REALM: master
+      RETRIES_COUNT: 20
       WAIT_FOR_KEYCLOAK: curl -f -s -o /dev/null http://keycloak-lb/auth/admin

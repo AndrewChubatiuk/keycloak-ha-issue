@@ -8,7 +8,7 @@ resource keycloak_saml_identity_provider saml {
   realm                      = keycloak_realm.internal.id
   alias                      = "saml"
   single_sign_on_service_url = "http://saml2:8180/simplesaml/saml2/idp/SSOService.php"
-  single_logout_service_url  = "http://saml2:8180/simplesaml/saml2/idp/SSOService.php"
+  single_logout_service_url  = "http://saml2:8180/simplesaml/saml2/idp/SingleLogoutService.php"
   name_id_policy_format      = "Persistent"
 }
 

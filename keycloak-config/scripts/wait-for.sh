@@ -6,7 +6,7 @@ PREFIX=WAIT_FOR_
 CHECKS=$(compgen -A variable | grep $PREFIX)
 for check in $CHECKS; do
    SERVICE=${check#"$PREFIX"}
-   RETRIES=10
+   RETRIES=${RETRIES_COUNT:-10}
    echo "Waiting for $SERVICE to start..."
    until ${!check}; do
       if [ $RETRIES > 0 ]; then
