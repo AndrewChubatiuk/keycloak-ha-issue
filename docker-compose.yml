@@ -18,6 +18,8 @@ services:
     labels:
       - "traefik.http.routers.keycloak.rule=PathPrefix(`/`)"
       - "traefik.http.services.keycloak-service.loadbalancer.server.port=8080"
+    volumes:
+      - ./keycloak/infinispan-work.cli:/opt/jboss/startup-scripts/infinispan-work.cli
     environment:
       KEYCLOAK_USER: ${KEYCLOAK_USER}
       KEYCLOAK_PASSWORD: ${KEYCLOAK_PASSWORD}
