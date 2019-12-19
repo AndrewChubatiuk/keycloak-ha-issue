@@ -73,3 +73,17 @@ services:
       KEYCLOAK_REALM: master
       RETRIES_COUNT: 20
       WAIT_FOR_KEYCLOAK: curl -f -s -o /dev/null http://keycloak-lb/auth/admin
+  test:
+    image: test
+    build: k6
+    network_mode: host
+    depends_on:
+      - keycloak-config
+    volumes:
+      - ./keycloak-config/scripts/wait-for.sh:/opt/wait-for.sh
+      - ./k6/test.js:/opt/test.js
+    environment:
+      RETRIES_COUNT: 30
+      WAIT_FOR_KEYCLOAK_LB: curl -f -s -o /dev/null http://localhost/auth/admin
+    entrypoint: /opt/wait-for.sh
+    command: k6 run -u 10 -d 30s /opt/test.js
