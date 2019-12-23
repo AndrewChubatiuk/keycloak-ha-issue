@@ -12,15 +12,20 @@ services:
       SIMPLESAMLPHP_ADMIN_PASSWORD: test
       SIMPLESAMLPHP_SECRET_SALT: salt
   keycloak:
-    image: jboss/keycloak:6.0.1
+    image: jboss/keycloak:8.0.1
     depends_on:
       - mysql
     labels:
-      - "traefik.http.routers.keycloak.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.keycloak-router.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.keycloak-router.service=keycloak-service"
       - "traefik.http.services.keycloak-service.loadbalancer.server.port=8080"
+      - "traefik.http.routers.keycloak-metrics-router.rule=PathPrefix(`/metrics`)"
+      - "traefik.http.routers.keycloak-metrics-router.service=keycloak-metrics-service"
+      - "traefik.http.services.keycloak-metrics-service.loadbalancer.server.port=9990"
     volumes:
       - ./keycloak/infinispan-work.cli:/opt/jboss/startup-scripts/infinispan-work.cli
     environment:
+      JDBC_PARAMS: useSSL=false
       KEYCLOAK_USER: ${KEYCLOAK_USER}
       KEYCLOAK_PASSWORD: ${KEYCLOAK_PASSWORD}
       DB_VENDOR: mysql
@@ -31,6 +36,12 @@ services:
       PROXY_ADDRESS_FORWARDING: "true"
       JGROUPS_DISCOVERY_PROTOCOL: JDBC_PING
       JGROUPS_DISCOVERY_PROPERTIES: "datasource_jndi_name=java:jboss/datasources/KeycloakDS"
+    command: 
+      - "-b"
+      - "0.0.0.0"
+      - "-Dwildfly.statistics-enabled=true"
+      - "-Djboss.bind.address.management=0.0.0.0"
+      - "-Dwildfly.metrics.prefix=keycloak"
   mysql:
     image: mysql:5.7
     ports:
