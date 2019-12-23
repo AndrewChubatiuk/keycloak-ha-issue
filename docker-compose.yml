@@ -36,7 +36,7 @@ services:
       PROXY_ADDRESS_FORWARDING: "true"
       JGROUPS_DISCOVERY_PROTOCOL: JDBC_PING
       JGROUPS_DISCOVERY_PROPERTIES: "datasource_jndi_name=java:jboss/datasources/KeycloakDS"
-    command: 
+    command:
       - "-b"
       - "0.0.0.0"
       - "-Dwildfly.statistics-enabled=true"
@@ -97,4 +97,4 @@ services:
       RETRIES_COUNT: 30
       WAIT_FOR_KEYCLOAK_LB: curl -f -s -o /dev/null http://localhost/auth/admin
     entrypoint: /opt/wait-for.sh
-    command: k6 run -u 10 -d 30s /opt/test.js
+    command: k6 run -u 20 -d 1h /opt/test.js
