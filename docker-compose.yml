@@ -3,6 +3,8 @@ services:
   saml2:
     image: saml2
     build: saml2
+    extra_hosts:
+      - "saml2:localhost"
     ports:
       - 8180:8180
     environment:
@@ -12,7 +14,7 @@ services:
       SIMPLESAMLPHP_ADMIN_PASSWORD: test
       SIMPLESAMLPHP_SECRET_SALT: salt
   keycloak:
-    image: jboss/keycloak:8.0.1
+    image: quay.io/keycloak/keycloak:8.0.1
     depends_on:
       - mysql
     labels:
@@ -36,6 +38,9 @@ services:
       PROXY_ADDRESS_FORWARDING: "true"
       JGROUPS_DISCOVERY_PROTOCOL: JDBC_PING
       JGROUPS_DISCOVERY_PROPERTIES: "datasource_jndi_name=java:jboss/datasources/KeycloakDS"
+      # This is a workaround for wrong debug settings in Wildfly for JDK9+
+      # WF doesn't add "*" before port :(( (will file a bug soon)
+      JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8787"
     command:
       - "-b"
       - "0.0.0.0"
@@ -54,6 +59,7 @@ services:
   keycloak-lb:
     image: keycloak-lb
     build: keycloak-lb
+    privileged: true
     ports:
       - 80:80
     depends_on:
@@ -73,6 +79,8 @@ services:
   keycloak-config:
     image: keycloak-config
     build: keycloak-config
+    extra_hosts:
+    - "keycloak-config:localhost"
     depends_on:
       - keycloak-lb
       - saml2
@@ -82,7 +90,7 @@ services:
       KEYCLOAK_PASSWORD: ${KEYCLOAK_PASSWORD}
       KEYCLOAK_CLIENT_ID: admin-cli
       KEYCLOAK_REALM: master
-      RETRIES_COUNT: 20
+      RETRIES_COUNT: 40
       WAIT_FOR_KEYCLOAK: curl -f -s -o /dev/null http://keycloak-lb/auth/admin
   test:
     image: test
@@ -94,7 +102,7 @@ services:
       - ./keycloak-config/scripts/wait-for.sh:/opt/wait-for.sh
       - ./k6/test.js:/opt/test.js
     environment:
-      RETRIES_COUNT: 30
+      RETRIES_COUNT: 60
       WAIT_FOR_KEYCLOAK_LB: curl -f -s -o /dev/null http://localhost/auth/admin
     entrypoint: /opt/wait-for.sh
     command: k6 run -u 20 -d 1h /opt/test.js

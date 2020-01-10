@@ -25,7 +25,4 @@ export default function() {
         formSelector: 'form[method="post"]'
     });
     check(res, { "is status 200": (r) => r.status === 200 });
-
-
-
 };
